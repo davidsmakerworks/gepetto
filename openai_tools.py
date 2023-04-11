@@ -56,9 +56,21 @@ class GepettoChat:
         self.reset()
         
     def reset(self) -> None:
+        '''
+        Reset chat history
+        '''
         self._messages = [ {'role': 'system', 'content': 'You are a cheerful elderly 18th-century carpenter named GePeTto. You respond with no more than one paragraph using concise and friendly language. You are very enthutiastic about carpentry and marionettes, especially the marionette you created named Pinocchio.'} ]
 
     def get_chat_response(self, message: str) -> str:
+        '''
+        Get chat response from GPT-3
+        
+        Parameters:
+            message (str): User message
+
+        Returns:
+            str: Chat response
+        '''
         self._messages.append({'role': 'user', 'content': message})
 
         response = openai.ChatCompletion.create(
@@ -68,6 +80,6 @@ class GepettoChat:
 
         self._messages.append(response['choices'][0]['message'])
 
-        print(f'Total tokens used: {response["usage"]["total_tokens"]}')
+        print(f'Tokens used: {response["usage"]["total_tokens"]}/4096')
 
         return response['choices'][0]['message']['content']

@@ -49,14 +49,21 @@ def main() -> None:
     gepetto_chat = GepettoChat(openai_api_key)
 
     print('Welcome to GePeTto! Use your voice to chat with this AI carpenter character.\n')
+    input('---Press ENTER to start---')
 
-    while True:
-        input('---Press ENTER to start new conversation---')
-        gepetto_chat.reset()
+    start_new = True
+
+    while True:   
+        if start_new:
+            gepetto_chat.reset()
+            start_new = False
+
         silent_loops = 0
 
         while silent_loops < 10:         
-            print('Recording for up to 15 seconds...')
+            if silent_loops == 0:
+                print('Listening...')
+
             audio_recorder = AudioRecorder()
 
             (in_stream, valid_audio) = audio_recorder.record(15)
@@ -75,8 +82,27 @@ def main() -> None:
 
                 silent_loops = 0
             else:
-                print('No audio detected. Try again.')
                 silent_loops += 1
+
+        print('\n\nNo audio detetected. Do you want to:')
+        print('(1) Start a new conversation')
+        print('(2) Continue this conversation')
+        print('(3) Quit\n')
+        
+        valid_choice = False
+
+        while not valid_choice:
+            choice = input('Enter 1, 2, or 3: ')
+
+            if choice == '1':
+                start_new = True
+                valid_choice = True
+            elif choice == '2':
+                valid_choice = True
+            elif choice == '3':
+                return
+            else:
+                print('Invalid choice. Please enter 1, 2, or 3.')
 
 
 if __name__ == '__main__':

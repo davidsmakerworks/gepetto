@@ -7,7 +7,7 @@ TODO: Clean up magic numbers
 
 TODO: Generalize tools for reusability
 
-TODO: Implement wake-work functionality
+TODO: Implement wake-word functionality
 
 TODO: Implement debug logging
 

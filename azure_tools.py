@@ -53,6 +53,9 @@ class AzureSpeech:
 
 
     def _refresh_token(self) -> None:
+        '''
+        Refreshes the access token if it has expired
+        '''
         if time.monotonic() >= self._token_exp_time:
             headers = {
                 'Ocp-Apim-Subscription-Key': self._subscription_key
@@ -67,6 +70,12 @@ class AzureSpeech:
     def text_to_speech(self, text: str) -> bytes:
         '''
         Converts text to speech using Azure Cognitive Services
+
+        Parameters:
+            text (str): Text to convert to speech
+
+        Returns:
+            bytes: Speech data
         
         TODO: Generalize configuration options and remove hard-coded items
         '''

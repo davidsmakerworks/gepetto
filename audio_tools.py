@@ -33,9 +33,18 @@ class AudioPlayer:
         self._stream = self._pyaudio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
 
     def play(self, audio_stream) -> None:
+        '''
+        Play audio stream.
+        
+        Parameters:
+            audio_stream (bytes): Audio stream to play
+        '''
         self._stream.write(audio_stream)
 
     def close(self) -> None:
+        '''
+        Close audio stream.
+        '''
         self._stream.stop_stream()
         self._stream.close()
         self._pyaudio.terminate()
