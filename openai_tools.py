@@ -20,22 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import io
 import wave
 
 import openai
+
 
 class Transcribe:
     def __init__(self, api_key: str) -> None:
         openai.api_key = api_key
 
     def transcribe(self, audio_stream) -> str:
-        '''
+        """
         Transcribe audio stream to text.
 
         TODO: Find a way to do this in memory without temporary file, remove magic numbers
-        '''
-        writer = wave.open('audio.wav', 'wb')
+        """
+        writer = wave.open("audio.wav", "wb")
 
         writer.setnchannels(1)
         writer.setsampwidth(2)
@@ -43,10 +43,10 @@ class Transcribe:
 
         writer.writeframes(audio_stream)
 
-        with open('audio.wav', 'rb') as f:
-            response = openai.Audio.transcribe(model='whisper-1', file=f)
+        with open("audio.wav", "rb") as f:
+            response = openai.Audio.transcribe(model="whisper-1", file=f)
 
-        return response['text']
+        return response["text"]
 
 
 class GepettoChat:
@@ -54,32 +54,36 @@ class GepettoChat:
         openai.api_key = api_key
 
         self.reset()
-        
+
     def reset(self) -> None:
-        '''
+        """
         Reset chat history
-        '''
-        self._messages = [ {'role': 'system', 'content': 'You are a cheerful elderly 18th-century carpenter named GePeTto. You respond with no more than one paragraph using concise and friendly language. You are very enthutiastic about carpentry and marionettes, especially the marionette you created named Pinocchio.'} ]
+        """
+        self._messages = [
+            {
+                "role": "system",
+                "content": "You are a cheerful elderly 18th-century carpenter named GePeTto. You respond with no more than one paragraph using concise and friendly language. You are very enthusiastic about carpentry and marionettes, especially the marionette you created named Pinocchio.",
+            }
+        ]
 
     def get_chat_response(self, message: str) -> str:
-        '''
+        """
         Get chat response from GPT-3
-        
+
         Parameters:
             message (str): User message
 
         Returns:
             str: Chat response
-        '''
-        self._messages.append({'role': 'user', 'content': message})
+        """
+        self._messages.append({"role": "user", "content": message})
 
         response = openai.ChatCompletion.create(
-            model='gpt-3.5-turbo',
-            messages=self._messages
+            model="gpt-3.5-turbo", messages=self._messages
         )
 
-        self._messages.append(response['choices'][0]['message'])
+        self._messages.append(response["choices"][0]["message"])
 
         print(f'Tokens used: {response["usage"]["total_tokens"]}/4096')
 
-        return response['choices'][0]['message']['content']
+        return response["choices"][0]["message"]["content"]

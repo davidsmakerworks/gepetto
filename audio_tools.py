@@ -30,21 +30,23 @@ from typing import Tuple
 class AudioPlayer:
     def __init__(self) -> None:
         self._pyaudio = pyaudio.PyAudio()
-        self._stream = self._pyaudio.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
+        self._stream = self._pyaudio.open(
+            format=pyaudio.paInt16, channels=1, rate=16000, output=True
+        )
 
     def play(self, audio_stream) -> None:
-        '''
+        """
         Play audio stream.
-        
+
         Parameters:
             audio_stream (bytes): Audio stream to play
-        '''
+        """
         self._stream.write(audio_stream)
 
     def close(self) -> None:
-        '''
+        """
         Close audio stream.
-        '''
+        """
         self._stream.stop_stream()
         self._stream.close()
         self._pyaudio.terminate()
@@ -53,22 +55,24 @@ class AudioPlayer:
 class AudioRecorder:
     def __init__(self) -> None:
         self._pyaudio = pyaudio.PyAudio()
-        self._stream = self._pyaudio.open(format=pyaudio.paInt16, channels=1, rate=8000, input=True)
+        self._stream = self._pyaudio.open(
+            format=pyaudio.paInt16, channels=1, rate=8000, input=True
+        )
 
     def record(self, max_duration: int) -> Tuple[bytes, bool]:
-        '''
+        """
         Record audio for up to max_duration seconds.
-        
+
         Returns:
             bytes: Audio stream
             bool: True if valid audio was recorded, False otherwise
-            
+
         TODO: Remove magic numbers
 
         TODO: Improve silence detection
 
         TODO: Trim pre-audio silence
-        '''
+        """
         frames = []
         num_frames = 0
         silent_frames = 0
@@ -76,11 +80,11 @@ class AudioRecorder:
         was_silent = True
 
         max_frames = int(max_duration * 8000 / 1024)
-        
+
         while (num_frames < max_frames) and not silence_detected:
             num_frames += 1
             data = self._stream.read(1024)
-            data_array = array.array('h', data)
+            data_array = array.array("h", data)
 
             if max(data_array) < 500:
                 if was_silent:
@@ -100,7 +104,7 @@ class AudioRecorder:
         else:
             valid_audio = True
 
-        return (b''.join(frames[:-10]), valid_audio)
+        return (b"".join(frames[:-10]), valid_audio)
 
     def close(self) -> None:
         self._stream.stop_stream()

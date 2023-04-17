@@ -29,40 +29,42 @@ from openai_tools import Transcribe, GepettoChat
 
 def main() -> None:
     try:
-        azure_speech_region = os.environ['AZURE_SPEECH_REGION']
-        azure_speech_key = os.environ['AZURE_SPEECH_KEY']
+        azure_speech_region = os.environ["AZURE_SPEECH_REGION"]
+        azure_speech_key = os.environ["AZURE_SPEECH_KEY"]
 
-        openai_api_key = os.environ['OPENAI_API_KEY']
+        openai_api_key = os.environ["OPENAI_API_KEY"]
     except KeyError:
-        print('Missing environment variables. Please set the following:')
-        print('AZURE_SPEECH_REGION')
-        print('AZURE_SPEECH_KEY')
-        print('OPENAI_API_KEY')
+        print("Missing environment variables. Please set the following:")
+        print("AZURE_SPEECH_REGION")
+        print("AZURE_SPEECH_KEY")
+        print("OPENAI_API_KEY")
         return
 
     audio_player = AudioPlayer()
     transcriber = Transcribe(api_key=openai_api_key)
     azure_speech = AzureSpeech(
-        subscription_key=azure_speech_key,
-        region=azure_speech_region)
+        subscription_key=azure_speech_key, region=azure_speech_region
+    )
 
     gepetto_chat = GepettoChat(openai_api_key)
 
-    print('Welcome to GePeTto! Use your voice to chat with this AI carpenter character.\n')
-    input('---Press ENTER to start---')
+    print(
+        "Welcome to GePeTto! Use your voice to chat with this AI carpenter character.\n"
+    )
+    input("---Press ENTER to start---")
 
     start_new = True
 
-    while True:   
+    while True:
         if start_new:
             gepetto_chat.reset()
             start_new = False
 
         silent_loops = 0
 
-        while silent_loops < 10:         
+        while silent_loops < 10:
             if silent_loops == 0:
-                print('Listening...')
+                print("Listening...")
 
             audio_recorder = AudioRecorder()
 
@@ -70,13 +72,13 @@ def main() -> None:
             audio_recorder.close()
 
             if valid_audio:
-                print('Transcribing...')
+                print("Transcribing...")
                 msg = transcriber.transcribe(in_stream)
 
-                print('Getting chat response...')
+                print("Getting chat response...")
                 response = gepetto_chat.get_chat_response(msg)
 
-                print('Playing response...')
+                print("Playing response...")
                 tts_stream = azure_speech.text_to_speech(response)
                 audio_player.play(tts_stream)
 
@@ -84,26 +86,26 @@ def main() -> None:
             else:
                 silent_loops += 1
 
-        print('\n\nNo audio detetected. Do you want to:')
-        print('(1) Start a new conversation')
-        print('(2) Continue this conversation')
-        print('(3) Quit\n')
-        
+        print("\n\nNo audio detected. Do you want to:")
+        print("(1) Start a new conversation")
+        print("(2) Continue this conversation")
+        print("(3) Quit\n")
+
         valid_choice = False
 
         while not valid_choice:
-            choice = input('Enter 1, 2, or 3: ')
+            choice = input("Enter 1, 2, or 3: ")
 
-            if choice == '1':
+            if choice == "1":
                 start_new = True
                 valid_choice = True
-            elif choice == '2':
+            elif choice == "2":
                 valid_choice = True
-            elif choice == '3':
+            elif choice == "3":
                 return
             else:
-                print('Invalid choice. Please enter 1, 2, or 3.')
+                print("Invalid choice. Please enter 1, 2, or 3.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

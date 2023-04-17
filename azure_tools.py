@@ -27,22 +27,27 @@ import xml.etree.ElementTree as ET
 
 
 class AzureSpeech:
-    def __init__(self,
-            subscription_key: str,
-            region: str,
-            output_format: str='riff-16khz-16bit-mono-pcm',
-            language: str='en-US',
-            gender: str='Male',
-            voice: str='en-US-JasonNeural',
-            user_agent: str='GePeTto 1.0') -> None:
-        
+    def __init__(
+        self,
+        subscription_key: str,
+        region: str,
+        output_format: str = "riff-16khz-16bit-mono-pcm",
+        language: str = "en-US",
+        gender: str = "Male",
+        voice: str = "en-US-JasonNeural",
+        user_agent: str = "GePeTto 1.0",
+    ) -> None:
         self._subscription_key: str = subscription_key
         self._region: str = region
 
-        self._fetch_token_url: str = f'https://{self._region}.api.cognitive.microsoft.com/sts/v1.0/issueToken'
-        self._tts_url: str = f'https://{self._region}.tts.speech.microsoft.com/cognitiveservices/v1'
+        self._fetch_token_url: str = (
+            f"https://{self._region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+        )
+        self._tts_url: str = (
+            f"https://{self._region}.tts.speech.microsoft.com/cognitiveservices/v1"
+        )
 
-        self._access_token: str = ''
+        self._access_token: str = ""
         self._token_exp_time: float = time.monotonic()
 
         self.output_format: str = output_format
@@ -51,24 +56,22 @@ class AzureSpeech:
         self.voice: str = voice
         self.user_agent = user_agent
 
-
     def _refresh_token(self) -> None:
-        '''
+        """
         Refreshes the access token if it has expired
-        '''
+        """
         if time.monotonic() >= self._token_exp_time:
-            headers = {
-                'Ocp-Apim-Subscription-Key': self._subscription_key
-            }
+            headers = {"Ocp-Apim-Subscription-Key": self._subscription_key}
 
             response = requests.post(self._fetch_token_url, headers=headers)
-            
-            self._access_token = str(response.text)
-            self._token_exp_time = time.monotonic() + (8*60) # Hard coded 8-minute expiration
 
+            self._access_token = str(response.text)
+            self._token_exp_time = time.monotonic() + (
+                8 * 60
+            )  # Hard coded 8-minute expiration
 
     def text_to_speech(self, text: str) -> bytes:
-        '''
+        """
         Converts text to speech using Azure Cognitive Services
 
         Parameters:
@@ -76,61 +79,47 @@ class AzureSpeech:
 
         Returns:
             bytes: Speech data
-        
+
         TODO: Generalize configuration options and remove hard-coded items
-        '''
+        """
         self._refresh_token()
 
         headers = {
-            'Authorization': 'Bearer ' + self._access_token,
-            'Content-Type': 'application/ssml+xml',
-            'X-Microsoft-OutputFormat': self.output_format,
-            'User-Agent': self.user_agent
+            "Authorization": "Bearer " + self._access_token,
+            "Content-Type": "application/ssml+xml",
+            "X-Microsoft-OutputFormat": self.output_format,
+            "User-Agent": self.user_agent,
         }
 
         speak_attrib = {
-            'version': '1.0',
-            'xmlns': 'http://www.w3.org/2001/10/synthesis',
-            'xmlns:mstts': 'https://www.w3.org/2001/mstts',
-            'xml:lang': self.language
+            "version": "1.0",
+            "xmlns": "http://www.w3.org/2001/10/synthesis",
+            "xmlns:mstts": "https://www.w3.org/2001/mstts",
+            "xml:lang": self.language,
         }
 
-        voice_attrib = {
-            'name': self.voice
-        }
+        voice_attrib = {"name": self.voice}
 
-        style_attrib = {
-            'style': 'cheerful',
-            'role': 'SeniorMale'
-        }
+        style_attrib = {"style": "cheerful", "role": "SeniorMale"}
 
-        prosody_attrib = {
-            'pitch': 'low'
-        }
+        prosody_attrib = {"pitch": "low"}
 
-        ssml_root = ET.Element(
-            'speak', 
-            attrib=speak_attrib)
+        ssml_root = ET.Element("speak", attrib=speak_attrib)
 
-        voice_element = ET.SubElement(
-            ssml_root,
-            'voice',
-            attrib=voice_attrib)
+        voice_element = ET.SubElement(ssml_root, "voice", attrib=voice_attrib)
 
         style_element = ET.SubElement(
-            voice_element,
-            'mstts:express-as',
-            attrib=style_attrib)
+            voice_element, "mstts:express-as", attrib=style_attrib
+        )
 
-        prosody_element = ET.SubElement(
-            style_element,
-            'prosody',
-            attrib=prosody_attrib)
+        prosody_element = ET.SubElement(style_element, "prosody", attrib=prosody_attrib)
 
         prosody_element.text = text
 
         request_content = ET.tostring(ssml_root)
 
-        response = requests.post(url=self._tts_url, headers=headers, data=request_content)
+        response = requests.post(
+            url=self._tts_url, headers=headers, data=request_content
+        )
 
         return response.content
